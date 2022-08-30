@@ -1,0 +1,10 @@
+---
+-hosts: localhost
+connection:local
+gather_facts:False
+
+vars:
+provider:
+ ip_address: '123.123.123.123'
+ username: 'superuser'
+ password: 'SuperSecretPassword'
