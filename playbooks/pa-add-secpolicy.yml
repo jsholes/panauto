@@ -1,0 +1,112 @@
+# Push Firewall rule 
+---
+
+- name: Palo Alto FW Rule Updates 
+  hosts: palo
+  connection: local
+
+  collections:
+    - paloaltonetworks.panos
+ 
+  tasks: 
+
+    - name: Grab credentials from vault
+      include_vars: '../inventory/group_vars/palo.yml'
+      no_log: 'yes'
+
+    - name: Create tag object 'Prod'
+      panos_tag_object:
+       provider: '{{ palo_provider  }}'
+       name: 'Prod'
+       color: 'blue'
+       comments: 'Prod Environment'
+
+    - name: Add the service object to the firewall first
+      panos_service_object:
+        provider: '{{ palo_provider }}'
+        name: 'service-tcp-221'
+        protocol: 'tcp'
+        destination_port: '221'
+        description: 'SSH on port 221'
+        tag: ['Prod'] 
+
+    - name: Add the service object to the firewall first
+      panos_service_object:
+        provider: '{{ palo_provider }}'
+        name: 'service-tcp-445'
+        protocol: 'tcp'
+        destination_port: '445'
+        description: 'SMB on port 445'
+        tag: ['Prod']
+
+    - name: Create service group 'Prod-Services'
+      panos_service_group:
+       provider: '{{ palo_provider  }}'
+       name: 'Prod-Services'
+       value: ['service-tcp-445', 'service-tcp-221']    
+
+    - name: Create first object 'Test-One'
+      panos_address_object:
+        provider: '{{ palo_provider }}'
+        name: 'Test-One'
+        value: '10.100.1.1'
+        description: 'Description of Test-One'
+        tag: ['Prod']
+
+    - name: Create first object 'Test-Two'
+      panos_address_object:
+        provider: '{{ palo_provider }}'
+        name: 'Test-Two'
+        value: '10.100.1.2'
+        description: 'Description of Test-TWo'
+        tag: ['Prod']
+
+    - name: Create object group 'AWS-TEST-APP-GROUP1'
+      panos_address_group:
+        provider: '{{ palo_provider }}'
+        name: 'AWS-TEST-APP-GROUP1'
+        static_value: ['Test-One', 'Test-Two']
+        tag: ['Prod']    
+
+    - name: Add test rule 1 to the firewall
+      panos_security_rule:
+        provider: '{{ palo_provider }}'
+        rule_name: 'Ansible test 1' #<source zone>-to-<dest zone>-<change ref>
+        #description: 'An Ansible test rule'
+        source_zone: ['INSIDE']
+        destination_zone: ['Outside']
+        source_ip: ['AWS-TEST-APP-GROUP1']
+        source_user: ['any']
+        destination_ip: ['any']
+        category: ['any']
+        application: ['any']
+        service: ['Prod-Services']
+        hip_profiles: ['any']
+        action: 'allow'
+
+    - name: Add test rule 2 to the firewall
+      panos_security_rule:
+        provider: '{{ palo_provider }}'
+        rule_name: 'Ansible test 2'
+        description: 'An Ansible test rule'
+        source_zone: ['INSIDE']
+        destination_zone: ['Outside']
+        source_ip: ['1.2.3.7']
+        source_user: ['any']
+        destination_ip: ['any']
+        category: ['any']
+        application: ['any']
+        service: ['service-https']
+        hip_profiles: ['any']
+        action: 'allow'
+
+    - name: commit candidate config on firewalls.
+      panos_commit:
+        provider: '{{ palo_provider }}'
+
+
+
+    
+
+
+
