@@ -19,3 +19,5 @@ panorama_secondary_ip: "4.4.4.4"
 ntp_server_primary_ip: "5.5.5.5"
 ntp_server_secondary_ip: "6.6.6.6"
 
+objecta: "Test-DHCP-Server"
+objecta_value: "100.10.100.1"
