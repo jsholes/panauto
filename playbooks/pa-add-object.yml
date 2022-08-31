@@ -12,7 +12,7 @@
 
     - name: Grab credentials from vault
       include_vars: '../inventory/group_vars/palo.yml'
-      no_log: 'yes'
+      no_log: true
 
     - name: Create first object '{{ objecta }}'
       panos_address_object:
