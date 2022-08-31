@@ -1,7 +1,7 @@
 # Push Firewall Object 
 ---
 
-- name: Palo Alto FW Rule Updates 
+- name: Palo Alto FW Object creation
   hosts: palo
   connection: local
 
